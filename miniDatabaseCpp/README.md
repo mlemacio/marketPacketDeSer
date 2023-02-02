@@ -3,4 +3,4 @@ A basic representation of a table in a database with that can represent a variab
 
 ![My Image](example_output.png)
 
-Written using C++20 including concepts
+Written using C++20 including concepts and built on top of bazel. To run yourself, clone repo and run "bazel run main"
