@@ -5,9 +5,11 @@
 #include "marketPacketProcessor/marketPacketProcessor.h"
 
 // Ideally, all these go into a config file
-constexpr std::string_view GENERATE_PATH = "./input.dat";
-constexpr std::string_view INPUT_PATH = "./input.dat";
-constexpr std::string_view OUTPUT_PATH = "/Users/maciejmleczko/projects/SampleCppCode/output.dat";
+const std::string PWD = "/Users/maciejmleczko/Desktop/cppProjects/marketPacketDeSer/inputOutput";
+
+const std::string GENERATE_PATH = PWD + "/input.dat";
+const std::string INPUT_PATH = PWD + "/input.dat";
+const std::string OUTPUT_PATH = PWD + "/output.dat";
 
 constexpr const size_t NUM_PACKETS = 2;
 constexpr const size_t MAX_UPDATES_PACKET = 10;
@@ -28,7 +30,7 @@ int main()
 
     // Process all the packets our input stream gives us
     {
-        marketPacket::marketPacketProcessor_t mpp(std::ifstream{INPUT_PATH}, std::ofstream{OUTPUT_PATH});
+        marketPacket::marketPacketProcessor_t mpp(std::ifstream{INPUT_PATH}, std::ofstream{OUTPUT_PATH, std::ofstream::out});
         mpp.initialize();
 
         const auto& processorFailReason = mpp.processNextPacket(NUM_PACKETS);
