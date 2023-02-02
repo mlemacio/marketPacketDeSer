@@ -9,7 +9,7 @@ int main()
     std::cout << std::boolalpha;
 
     // Define our table
-    table_t t(std::vector<colType_e>{colType_e::STRING, colType_e::INTEGER, colType_e::BOOLEAN});
+    table_t t({colType_e::STRING, colType_e::INTEGER, colType_e::BOOLEAN});
 
     // Add rows to our table
     t.appendRow({"aa", 3, true});

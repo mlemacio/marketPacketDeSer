@@ -28,7 +28,7 @@ namespace table
          *
          * @param tableDef Ordered container of types
          */
-        template <ContainerOf<colType_e> C = std::vector<sortPolicy_t>>
+        template <ContainerOf<colType_e> C = std::vector<colType_e>>
         table_t(C &&tableDef)
             : m_tableDef(std::move(tableDef)),
               m_compareFuncs(),
