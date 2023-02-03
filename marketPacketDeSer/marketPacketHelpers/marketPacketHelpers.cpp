@@ -47,7 +47,6 @@ namespace marketPacket
         tradeStr.append(" Price: ");
         tradeStr.append(std::to_string(t->tradePrice));
         
-
         return tradeStr;
     }
 }

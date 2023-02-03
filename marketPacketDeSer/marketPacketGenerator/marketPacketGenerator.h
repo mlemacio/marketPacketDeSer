@@ -21,7 +21,7 @@ namespace marketPacket
          *
          * @param oStream Where market packets get written to
          */
-        marketPacketGenerator_t(std::ofstream&& oStream)
+        marketPacketGenerator_t(std::ofstream &&oStream)
             : m_state(state_t::UNINITIALIZED),
               m_failReason(),
               m_numPackets(),
@@ -76,6 +76,14 @@ namespace marketPacket
         void resetPerRunVariables(size_t numPackets, size_t numMaxUpdates);
         void resetPerPacketVariables();
 
+        /**
+         * @brief Write directly to the buffer without having to make a temporary
+         *
+         * ASSUMPTION: The buffer has enough memory allocated to write tp
+         */
+        void writeRandomTradeToBuffer(update_t &buffer);
+        void writeRandomQuoteToBuffer(update_t &buffer);
+
         state_t m_state;                          // Current state of the generator
         std::optional<failReason_t> m_failReason; // If populated, why we stopped generating
 
@@ -85,9 +93,6 @@ namespace marketPacket
         uint16_t m_numMaxUpdates;     // Per packet, what is the max number of updates in said packet
         uint16_t m_numUpdates;        // How many updates we expect to generate in a packet
         uint16_t m_numUpdatesWritten; // How many updates we have written so far
-
-        trade_t m_trade; // Trade to write
-        quote_t m_quote; // Quote to write
 
         packetHeader_t m_ph;                                  // Header we write to the stream
         std::array<update_t, UPDATES_IN_WRITE_BUF> m_updates; // Where we store the updates before we write

@@ -20,24 +20,6 @@ namespace marketPacket
             return;
         }
 
-        // Ideally, these are random every time but we don't *need* it to be
-        // And that'd slow down performance by a lot making a random one everytime
-        // There are solutions to that, just none of them are simple
-        m_trade = trade_t{
-            .updateHeader = {sizeof(trade_t), updateType_e::TRADE},
-            .tradeSize = static_cast<uint16_t>(rand()),
-            .tradePrice = static_cast<uint64_t>(rand()),
-        };
-
-        m_quote = quote_t{
-            .updateHeader = {sizeof(quote_t), updateType_e::QUOTE},
-            .priceLevel = static_cast<uint16_t>(rand()),
-            .priceLevelSize = static_cast<uint64_t>(rand()),
-            .timeOfDay = static_cast<uint64_t>(rand())};
-
-        std::memcpy(m_trade.symbol, generateRandomSymbol().c_str(), SYMBOL_LENGTH);
-        std::memcpy(m_quote.symbol, generateRandomSymbol().c_str(), SYMBOL_LENGTH);
-
         m_state = state_t::WRITE_HEADER;
     };
 
@@ -139,8 +121,7 @@ namespace marketPacket
         for (size_t i = 0; i < numUpdatesToGenerate; i++)
         {
             // Pick randomly betweern a trade or quote and write it to buffer
-            const void *srcPtr = (rand() % 2) ? reinterpret_cast<void *>(&m_trade) : reinterpret_cast<void *>(&m_quote);
-            memcpy(&m_updates[i], srcPtr, UPDATE_SIZE);
+            (rand() % 2) ? writeRandomQuoteToBuffer(m_updates[i]) : writeRandomTradeToBuffer(m_updates[i]);
         }
 
         if (!(m_oStream.write(reinterpret_cast<char *>(m_updates.data()), numUpdatesToGenerate * sizeof(update_t))))
@@ -171,4 +152,27 @@ namespace marketPacket
     {
         m_numUpdatesWritten = 0;
     }
+
+    void marketPacketGenerator_t::writeRandomTradeToBuffer(update_t &buf)
+    {
+        trade_t *t = reinterpret_cast<trade_t *>(&buf);
+
+        t->updateHeader = {sizeof(trade_t), updateType_e::TRADE};
+        t->tradeSize = static_cast<uint16_t>(rand());
+        t->tradePrice = static_cast<uint64_t>(rand());
+
+        std::memcpy(t->symbol, generateRandomSymbol().c_str(), SYMBOL_LENGTH);
+    };
+
+    void marketPacketGenerator_t::writeRandomQuoteToBuffer(update_t &buf)
+    {
+        quote_t *q = reinterpret_cast<quote_t *>(&buf);
+
+        q->updateHeader = {sizeof(quote_t), updateType_e::QUOTE},
+        q->priceLevel = static_cast<uint16_t>(rand()),
+        q->priceLevelSize = static_cast<uint64_t>(rand()),
+        q->timeOfDay = static_cast<uint64_t>(rand());
+
+        std::memcpy(q->symbol, generateRandomSymbol().c_str(), SYMBOL_LENGTH);
+    };
 };
