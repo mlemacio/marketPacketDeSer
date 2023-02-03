@@ -13,6 +13,7 @@ int main()
 
     // Add rows to our table
     t.appendRow({"aa", 3, true});
+    
     t.appendRow({"bbb", 1, true});
     t.appendRow({"xx", 2, false});
     t.appendRow({"aa", 4, true});
