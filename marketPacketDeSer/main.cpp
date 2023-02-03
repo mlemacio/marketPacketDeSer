@@ -12,7 +12,7 @@ const std::string INPUT_PATH = PWD + "/input.dat";
 const std::string OUTPUT_PATH = PWD + "/output.dat";
 
 constexpr const size_t NUM_PACKETS = 2;
-constexpr const size_t MAX_UPDATES_PACKET = 10;
+constexpr const size_t MAX_UPDATES_PACKET = 1000;
 
 int main()
 {
