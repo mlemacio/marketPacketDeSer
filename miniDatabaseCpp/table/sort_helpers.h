@@ -3,6 +3,7 @@
 
 #include <functional>
 
+#include "generic/named_type.h"
 #include "table_helpers.h"
 
 namespace table
@@ -19,16 +20,26 @@ namespace table
     };
 
     /**
+     * @brief Try to use strong types as much as possible over primitive types
+     */
+    using colIndex_t = NamedType<int, struct columnIndex>;
+    enum class sortOrder_e : bool
+    {
+        ASC,
+        DESC
+    };
+
+    /**
      * @brief What we need to know to sort
      */
     struct sortPolicy_t
     {
-        int colIndex;     // Which column, relative to the table, should we sort on
-        bool isAscending; // Should we sort in ascending order (If not, sort in descending order)
+        colIndex_t colIndex;   // Which column, relative to the table, should we sort on
+        sortOrder_e sortOrder; // Should we sort in ascending order (If not, sort in descending order)
     };
 
-    using policyFunc_f = std::function<compareResult_e(const row_t &, const row_t &)>;
-    using compareFunc_f = std::function<compareResult_e(const colValue_t &, const colValue_t &)>;
+    using policyFunc_f = NamedType<std::function<compareResult_e(const row_t &, const row_t &)>, struct PolicyFunction>;
+    using compareFunc_f = NamedType<std::function<compareResult_e(const colValue_t &, const colValue_t &)>, struct CompareFunction>;
 
     /**
      * @brief Compares two column values and returns the ordering between the two
@@ -41,8 +52,8 @@ namespace table
     template <ColumnType T>
     static compareResult_e compareType(const colValue_t &lhs, const colValue_t &rhs)
     {
-        auto left = std::get<T>(lhs);
-        auto right = std::get<T>(rhs);
+        const auto left = std::get<T>(lhs);
+        const auto right = std::get<T>(rhs);
 
         // There are other ways to do this, but in theory, the < operator is all that's needed
         if (left < right)
@@ -67,25 +78,25 @@ namespace table
      * @param ct Column type
      * @return compareFunc_f How to compare two values associated with the given column type
      */
-    compareFunc_f getTypeSpecificComparisonFunc(const colType_e ct)
+    static compareFunc_f getTypeSpecificComparisonFunc(const colType_e ct)
     {
         switch (ct)
         {
         case colType_e::INTEGER:
         {
-            return compareType<int>;
+            return compareFunc_f(compareType<int>);
         }
         case colType_e::STRING:
         {
-            return compareType<std::string>;
+            return compareFunc_f(compareType<std::string>);
         }
         case colType_e::DOUBLE:
         {
-            return compareType<double>;
+            return compareFunc_f(compareType<double>);
         }
         case colType_e::BOOLEAN:
         {
-            return compareType<bool>;
+            return compareFunc_f(compareType<bool>);
         }
         }
     }
@@ -98,10 +109,10 @@ namespace table
     {
         bool operator()(const row_t &lhs, const row_t &rhs)
         {
-            for (const auto &f : sortPriority)
+            for (const auto &f : sortPriorityFunctions)
             {
                 // Compare the value for this sort priority
-                auto compareResult = f(lhs, rhs);
+                auto compareResult = f.get()(lhs, rhs);
 
                 // Need to use next tie breaker
                 if (compareResult == compareResult_e::EQUAL_TO)
@@ -116,7 +127,7 @@ namespace table
             return false;
         };
 
-        std::vector<policyFunc_f> sortPriority; // In order, how we should evaluate a row against another row
+        std::vector<const policyFunc_f> sortPriorityFunctions; // In order, how we should evaluate a row against another row
     };
 }
 

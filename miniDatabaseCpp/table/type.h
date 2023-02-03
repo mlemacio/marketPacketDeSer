@@ -50,8 +50,13 @@ concept Container = requires(ContainerType a, const ContainerType b) {
                             } -> std::convertible_to<bool>;
                     };
 
+/**
+ * @brief Concept describing a Container C that holds a specific type T
+ *
+ * Example: ContainerOf<double> would accept any "Container" that holds doubles
+ */
 template <typename C, typename T>
-concept ContainerOf = requires(C c) {
-                          std::same_as<typename C::value_type, T>;
-                      };
+concept ContainerOf = Container<C> && requires(C c) {
+                                          std::same_as<typename C::value_type, T>;
+                                      };
 #endif // TABLE_TYPE_H

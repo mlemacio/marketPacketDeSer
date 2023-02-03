@@ -35,7 +35,7 @@ namespace table
     using colValue_t = std::variant<int, std::string, bool, double>;
 
     // For simplicity, just assume a row is a vector of column values. This can get a lot more complex
-    using row_t = std::vector<colValue_t>;
+    using row_t = std::vector<const colValue_t>;
     using rows_t = std::vector<row_t>;
 
     /**

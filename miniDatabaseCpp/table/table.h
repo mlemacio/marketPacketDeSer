@@ -28,7 +28,7 @@ namespace table
          *
          * @param tableDef Ordered container of types
          */
-        template <ContainerOf<colType_e> C = std::vector<colType_e>>
+        template <ContainerOf<const colType_e> C = std::vector<const colType_e>>
         table_t(C &&tableDef)
             : m_tableDef(std::move(tableDef)),
               m_compareFuncs(),
@@ -57,13 +57,13 @@ namespace table
          *
          * @param sortPolicies
          */
-        template <ContainerOf<sortPolicy_t> C = std::vector<sortPolicy_t>>
+        template <ContainerOf<const sortPolicy_t> C = std::vector<const sortPolicy_t>>
         void sort(const C &sortPolicies)
         {
             // The whole gimmick here is to have the STL sort for us with std::sort
             // And we just create the sorting operator
             sortHelper_t sh;
-            sh.sortPriority.reserve(sortPolicies.size());
+            sh.sortPriorityFunctions.reserve(sortPolicies.size());
 
             // For every policy, build a comparison function between two rows for this sort policy
             for (const auto &policy : sortPolicies)
@@ -72,14 +72,14 @@ namespace table
 
                 auto compareFunc = [this, &policy](const row_t &lhs, const row_t &rhs)
                 {
-                    auto &leftVal = lhs[policy.colIndex];
-                    auto &rightVal = rhs[policy.colIndex];
+                    auto &leftVal = lhs[policy.colIndex.get()];
+                    auto &rightVal = rhs[policy.colIndex.get()];
 
                     // Grab the comparison function based on which column we're dealing with and make comparison
-                    auto &valCompareFunc = m_compareFuncs[policy.colIndex];
-                    auto compareRes = valCompareFunc(leftVal, rightVal);
+                    auto &valCompareFunc = m_compareFuncs[policy.colIndex.get()];
+                    auto compareRes = valCompareFunc.get()(leftVal, rightVal);
 
-                    if (!policy.isAscending)
+                    if (policy.sortOrder == sortOrder_e::DESC)
                     {
                         // This trick only works when you set the values in the enum
                         compareRes = static_cast<compareResult_e>(-1 * static_cast<int>(compareRes));
@@ -88,7 +88,7 @@ namespace table
                     return compareRes;
                 };
 
-                sh.sortPriority.emplace_back(std::move(compareFunc));
+                sh.sortPriorityFunctions.emplace_back(std::move(compareFunc));
             }
 
             // Once we have all our policy functions built, use the STL sort
@@ -151,7 +151,7 @@ namespace table
          */
         bool isSortPolicyValid(const sortPolicy_t &sp)
         {
-            if (sp.colIndex >= m_tableDef.size())
+            if (sp.colIndex.get() >= m_tableDef.size())
             {
                 return false;
             }
@@ -159,8 +159,8 @@ namespace table
             return true;
         }
 
-        std::vector<colType_e> m_tableDef;         // Represents the columns and their types
-        std::vector<compareFunc_f> m_compareFuncs; // Parallel to m_tableDef, for each column, what compare func should it use
+        std::vector<const colType_e> m_tableDef;         // Represents the columns and their types
+        std::vector<const compareFunc_f> m_compareFuncs; // Parallel to m_tableDef, for each column, what compare func should it use
 
         rows_t m_rows; // Holds the rows of the table
     };

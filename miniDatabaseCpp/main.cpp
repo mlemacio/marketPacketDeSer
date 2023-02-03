@@ -24,22 +24,22 @@ int main()
 
     // Sort in various ways and print it
     std::cout << "Table after Sort Ordering: {{0, asc}}" << '\n';
-    t.sort({{0, true}});
+    t.sort({{colIndex_t(0), sortOrder_e::ASC}});
     t.print();
     std::cout << '\n';
 
     std::cout << "Table after Sort Ordering: {{2, asc}, {1, asc}}" << '\n';
-    t.sort({{2, true}, {1, true}});
+    t.sort({{colIndex_t(2), sortOrder_e::ASC}, {colIndex_t(1), sortOrder_e::ASC}});
     t.print();
     std::cout << '\n';
 
     std::cout << "Table after Sort Ordering: {{2, asc}, {1, desc}}" << '\n';
-    t.sort({{2, true}, {1, false}});
+    t.sort({{colIndex_t(2), sortOrder_e::ASC}, {colIndex_t(2), sortOrder_e::DESC}});
     t.print();
     std::cout << '\n';
 
     std::cout << "Table after Sort Ordering: {{1, desc}, {2, asc}}" << '\n';
-    t.sort({{1, false}, {2, true}});
+    t.sort({{colIndex_t(2), sortOrder_e::DESC}, {colIndex_t(2), sortOrder_e::ASC}});
     t.print();
     std::cout << '\n';
     return 0;
