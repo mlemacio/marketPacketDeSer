@@ -7,7 +7,7 @@ Things to look for:
 - Use of alignas() for cache coherent programming
 - Use of static assert to enforce invariants
 - Decent testing coverage / error checking
-- Unnecessarily materializing objects on the stack instead of writing/reading directly from streams
+- Preventing materializing objects on the stack by smart use of reinterpret_cast with streams
 - General Modern C++ Features (std::byte vs char)
 - Performance
 
